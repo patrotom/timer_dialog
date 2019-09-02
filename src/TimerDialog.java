@@ -3,12 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class TimerDialog extends JDialog {
-
-    Timer timer = new Timer(1000, new TimerListener());
-    TimerListener timerListener = new TimerListener();
-    long startTime;
-    int seconds;
-
     /** Start this timer. */
     protected final JButton startButton = new JButton("Start");
 
@@ -18,6 +12,9 @@ public class TimerDialog extends JDialog {
     /** Display the elapsed time. */
     protected final JLabel timeDisplay =
             new JLabel("0:00:00", SwingConstants.CENTER);
+
+    private TimerModel m_timerModel = new TimerModel(timeDisplay);
+    private Timer m_timer = new Timer(1000, m_timerModel);
 
     public TimerDialog() {
         super((JFrame) null, "Timer");
@@ -48,30 +45,37 @@ public class TimerDialog extends JDialog {
     /** Callback to be invoked when the start button is clicked.
      * Hook to be overridden by a subclass. */
     protected void startClicked() {
-        startTime = System.currentTimeMillis();
-        timer.start();
+        m_timerModel.setStartTime(System.currentTimeMillis());
+        m_timer.start();
     }
 
     /** Callback to be invoked when the stop button is clicked.
      * Hook to be overridden by a subclass. */
     protected void stopClicked() {
-        timer.stop();
-        timeDisplay.setText("Stop clicked.");
-    }
-
-    class TimerListener implements ActionListener {
-        private void showElapsedTime() {
-
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            long now = System.currentTimeMillis();
-            long elapsed = now - startTime;
-            timeDisplay.setText(String.valueOf(elapsed / 1000));
-        }
+        m_timer.stop();
+        timeDisplay.setText("0:00:00");
     }
 
     public static void main(String[] args) {
         new TimerDialog();
+    }
+}
+
+class TimerModel implements ActionListener {
+    private long m_startTime;
+    private JLabel m_timeDisplay;
+
+    TimerModel(JLabel timeDisplay) {
+        m_timeDisplay = timeDisplay;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        long now = System.currentTimeMillis();
+        long elapsed = now - m_startTime;
+        m_timeDisplay.setText(String.valueOf(elapsed / 1000));
+    }
+
+    public void setStartTime(long startTime) {
+        m_startTime = startTime;
     }
 }
