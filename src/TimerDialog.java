@@ -3,13 +3,10 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class TimerDialog extends JDialog {
-    /** Start this timer. */
     protected final JButton startButton = new JButton("Start");
 
-    /** Stop this timer. */
     protected final JButton stopButton = new JButton("Stop");
 
-    /** Display the elapsed time. */
     protected final JLabel timeDisplay =
             new JLabel("0:00:00", SwingConstants.CENTER);
 
@@ -42,15 +39,11 @@ public class TimerDialog extends JDialog {
         stopButton.addActionListener(e -> stopClicked());
     }
 
-    /** Callback to be invoked when the start button is clicked.
-     * Hook to be overridden by a subclass. */
     protected void startClicked() {
         m_timerModel.setStartTime(System.currentTimeMillis());
         m_timer.start();
     }
 
-    /** Callback to be invoked when the stop button is clicked.
-     * Hook to be overridden by a subclass. */
     protected void stopClicked() {
         m_timer.stop();
         timeDisplay.setText("0:00:00");
@@ -70,12 +63,35 @@ class TimerModel implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        long now = System.currentTimeMillis();
-        long elapsed = now - m_startTime;
-        m_timeDisplay.setText(String.valueOf(elapsed / 1000));
+        long elapsed = System.currentTimeMillis() - m_startTime;
+        showElapsedTime(elapsed / 1000);
     }
 
     public void setStartTime(long startTime) {
         m_startTime = startTime;
+    }
+
+    private void showElapsedTime(long elapsed) {
+        if ((elapsed / (24 * 3600)) >= 1) {
+            m_timeDisplay.setText("0:00:00");
+            return;
+        }
+
+        elapsed = elapsed % (24 * 3600);
+        String h = String.valueOf(elapsed / 3600);
+
+        elapsed %= 3600;
+        String m = String.valueOf(elapsed / 60);
+
+        if ((elapsed / 60) < 10)
+            m = "0" + m;
+
+        elapsed %= 60;
+        String s = String.valueOf(elapsed);
+
+        if (elapsed < 10)
+            s = "0" + s;
+
+        m_timeDisplay.setText(h + ":" + m + ":" + s);
     }
 }
